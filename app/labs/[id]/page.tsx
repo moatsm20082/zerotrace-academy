@@ -4,7 +4,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { Shell, PageTitle } from "@/components/ui";
 
-export default function LabDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function LabDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const [labId, setLabId] = useState<string>("");
   const [lab, setLab] = useState<any>(null);
   const [answer, setAnswer] = useState("");
@@ -26,11 +30,16 @@ export default function LabDetailPage({ params }: { params: Promise<{ id: string
   }, [labId]);
 
   async function load() {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("labs")
       .select("*")
       .eq("id", labId)
       .single();
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
 
     setLab(data);
   }
@@ -72,7 +81,7 @@ export default function LabDetailPage({ params }: { params: Promise<{ id: string
         <PageTitle
           badge="Lab"
           title="Loading lab..."
-          subtitle="Fetching lab from Supabase."
+          subtitle={message || "Fetching lab from Supabase."}
         />
       </Shell>
     );
@@ -138,13 +147,13 @@ export default function LabDetailPage({ params }: { params: Promise<{ id: string
               "Read the objective carefully.",
               "Identify the artifact type.",
               "Validate your answer format.",
-            ].map((h, i) => (
+            ].map((hint, index) => (
               <details
-                key={h}
+                key={hint}
                 className="mt-3 rounded-xl border border-white/10 bg-black/25 p-4"
               >
-                <summary>Hint {i + 1}</summary>
-                <p className="mt-2 text-slate-400">{h}</p>
+                <summary>Hint {index + 1}</summary>
+                <p className="mt-2 text-slate-400">{hint}</p>
               </details>
             ))}
           </div>
